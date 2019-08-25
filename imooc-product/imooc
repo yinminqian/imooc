@@ -1,0 +1,5 @@
+1.model // 首先声明model 数据库结构
+2.repositories // 建立数据库映射关系
+3.services // 操作服务类
+4.controller // 中间件逻辑
+5.views // 映射视图

@@ -1,6 +1,15 @@
 package main
 
-import "github.com/kataras/iris"
+import (
+	"context"
+	"fmt"
+	"github.com/kataras/iris"
+	"github.com/kataras/iris/mvc"
+	"imooc-product/backend/web/controllers"
+	"imooc-product/common"
+	"imooc-product/repositories"
+	"imooc-product/services"
+)
 
 func main() {
 	//创建iris实例
@@ -16,10 +25,24 @@ func main() {
 	app.OnAnyErrorCode(func(context iris.Context) {
 		context.ViewData("messages", context.Values().GetStringDefault("messages", "访问的页面出错"))
 		context.ViewLayout("")
-		context.View("share/error.html")
+		context.View("shared/error.html")
 	})
+	//链接数据库
+	db, err := common.NewMysqlConn()
+	if err != nil {
+		fmt.Print("err:=>", err)
+	}
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
 	//注册控制器
+	productRepository := repositories.NewProductManager("product", db)
+	productService := services.NewProductService(productRepository)
+	productParty := app.Party("/product")
+	product := mvc.New(productParty)
+	product.Register(ctx, productService)
+	product.Handle(new(controllers.ProductController))
 
 	//启动服务
 	app.Run(

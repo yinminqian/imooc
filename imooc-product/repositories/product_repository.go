@@ -72,13 +72,12 @@ func (p *ProductManager) Insert(product *datamodels.Product) (productId int64, e
 	return result.LastInsertId()
 }
 
-//删
+//商品的删除
 func (p *ProductManager) Delete(productID int64) bool {
-	//判断sql链接
+	//1.判断连接是否存在
 	if err := p.Conn(); err != nil {
 		return false
 	}
-	//写删除sql语句
 	sql := "delete from product where ID=?"
 	stmt, err := p.mysqlConn.Prepare(sql)
 	defer stmt.Close()
@@ -90,7 +89,7 @@ func (p *ProductManager) Delete(productID int64) bool {
 		return false
 	}
 	return true
-}￿
+}
 
 //改
 func (p *ProductManager) Update(product *datamodels.Product) (err error) {
@@ -119,8 +118,7 @@ func (p *ProductManager) SelectByKey(productID int64) (productResult *datamodels
 	if err = p.Conn(); err != nil {
 		return &datamodels.Product{}, err
 	}
-	sql := "Select from " + p.table + "where ID=" + strconv.FormatInt(productID, 10)
-
+	sql := "Select * from " + p.table + " where ID =" + strconv.FormatInt(productID, 10)
 	row, errStmt := p.mysqlConn.Query(sql)
 	if errStmt != nil {
 		return &datamodels.Product{}, errStmt
@@ -129,7 +127,7 @@ func (p *ProductManager) SelectByKey(productID int64) (productResult *datamodels
 	if len(result) == 0 {
 		return &datamodels.Product{}, nil
 	}
-
+	productResult = &datamodels.Product{}
 	common.DataToStructByTagSql(result, productResult)
 	return
 }

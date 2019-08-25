@@ -79,14 +79,13 @@ func (p *ProductManager) Delete(productID int64) bool {
 		return false
 	}
 	//写删除sql语句
-
-	sql := "DELETE FROM product WHERE ID=?"
+	sql := "delete from product where ID=?"
 	stmt, err := p.mysqlConn.Prepare(sql)
+	defer stmt.Close()
 	if err != nil {
 		return false
 	}
-	//执行被转换后的sql语句,传入占位符
-	_, err = stmt.Exec(productID)
+	_, err = stmt.Exec(strconv.FormatInt(productID, 10))
 	if err != nil {
 		return false
 	}
@@ -100,7 +99,7 @@ func (p *ProductManager) Update(product *datamodels.Product) (err error) {
 		return err
 	}
 	//写sql语句
-	sql := "UPdate product set productName=?,productNum=?,productImage=?,productUrl=? where ID=" +
+	sql := "Update product set productName=?,productNum=?,productImage=?,productUrl=? where ID=" +
 		strconv.FormatInt(product.ID, 10)
 	//转换sql语句
 	stmt, err := p.mysqlConn.Prepare(sql)
@@ -114,7 +113,6 @@ func (p *ProductManager) Update(product *datamodels.Product) (err error) {
 	}
 	return nil
 }
-
 
 //查 单条
 func (p *ProductManager) SelectByKey(productID int64) (productResult *datamodels.Product, err error) {
@@ -133,5 +131,29 @@ func (p *ProductManager) SelectByKey(productID int64) (productResult *datamodels
 	}
 
 	common.DataToStructByTagSql(result, productResult)
+	return
+}
+
+//查询所有的数据
+
+func (p *ProductManager) SelectAll() (productArr []*datamodels.Product, err error) {
+	if err = p.Conn(); err != nil {
+		return nil, err
+	}
+	sql := "select * from " + p.table
+	rows, errSql := p.mysqlConn.Query(sql)
+	if errSql != nil {
+		return nil, errSql
+	}
+	result := common.GetResultRows(rows)
+	if len(result) == 0 {
+		return nil, nil
+	}
+
+	for _, v := range result {
+		product := &datamodels.Product{}
+		common.DataToStructByTagSql(v, product)
+		productArr = append(productArr, product)
+	}
 	return
 }

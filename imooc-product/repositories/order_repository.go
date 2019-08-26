@@ -43,8 +43,8 @@ func (o *OrderMangerRepository) Conn() error {
 
 //订单的插入
 func (o *OrderMangerRepository) Insert(order *datamodels.Order) (productID int64, err error) {
-	if err := o.Conn; err != nil {
-		return
+	if err = o.Conn(); err != nil {
+		return productID, err
 	}
 	sql := "INSERT " + o.table + " set userID=?,productID=?,orderStatus=?"
 	stmt, errStmt := o.mysqlConn.Prepare(sql)
@@ -80,8 +80,8 @@ func (o *OrderMangerRepository) Delete(productID int64) (isOK bool) {
 
 //订单的更新
 func (o *OrderMangerRepository) Update(order *datamodels.Order) (err error) {
-	if err := o.Conn; err != nil {
-		return
+	if err = o.Conn(); err != nil {
+		return err
 	}
 	sql := "Update " + o.table + " set userID=?,productID=?,orderStatus=? where ID=" +
 		strconv.FormatInt(order.ID, 10)

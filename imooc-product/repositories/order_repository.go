@@ -44,7 +44,7 @@ func (o *OrderMangerRepository) Conn() error {
 //订单的插入
 func (o *OrderMangerRepository) Insert(order *datamodels.Order) (productID int64, err error) {
 	if err = o.Conn(); err != nil {
-		return 0, err
+		return productID, err
 	}
 	sql := "INSERT " + o.table + " set userID=?,productID=?,orderStatus=?"
 	stmt, errStmt := o.mysqlConn.Prepare(sql)

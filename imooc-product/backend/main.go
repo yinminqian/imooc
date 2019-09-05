@@ -44,6 +44,14 @@ func main() {
 	product.Register(ctx, productService)
 	product.Handle(new(controllers.ProductController))
 
+	//注册order控制器
+	orderRepository := repositories.NewOrderMAngerRepository("order", db)
+	orderService := services.NewOrderService(orderRepository)
+	orderParty := app.Party("/order")
+	order := mvc.New(orderParty)
+	order.Register(ctx, orderService)
+	order.Handle(new(controllers.OrderController))
+
 	//启动服务
 	app.Run(
 		iris.Addr("localhost:8080"),
